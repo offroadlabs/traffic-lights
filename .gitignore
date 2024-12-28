@@ -1,0 +1,10 @@
+# Zephyr workspace
+.zephyr-workspace/ 
+node_modules/
+.next/
+.vscode/
+.cursorignore
+.cursorrules
+.env
+build/
+.idea/

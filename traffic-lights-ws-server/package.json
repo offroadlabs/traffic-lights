@@ -1,0 +1,18 @@
+{
+  "name": "traffic-lights-ws-server",
+  "module": "main.ts",
+  "type": "module",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "bun-types": "^1.1.42"
+  },
+  "scripts": {
+    "start": "bun run main.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

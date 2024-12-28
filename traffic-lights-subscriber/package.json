@@ -1,0 +1,11 @@
+{
+  "name": "test-redis",
+  "module": "main.ts",
+  "type": "module",
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}

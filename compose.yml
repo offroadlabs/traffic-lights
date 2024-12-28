@@ -1,0 +1,72 @@
+services:
+  zephyr-dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    networks:
+      zephyr-net:
+        ipv4_address: 10.5.0.2
+    platform: linux/amd64
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./traffic-lights-orcherstrator/:/traffic-lights-orcherstrator
+    environment:
+      - ZEPHYR_BASE=/workdir/zephyr
+    working_dir: /workdir
+    ports:
+      - "8000:8000"  
+    tty: true
+    stdin_open: true
+    command: sh -c "/services.sh & > /dev/null 2>&1 && cd /traffic-lights-orcherstrator && west build -b qemu_x86 . -- -DCONF_FILE=prj.conf && west build -t run"
+
+  traffic-lights-ws:
+    image: oven/bun:latest
+    working_dir: /traffic-lights-ws-server
+    volumes:
+      - ./traffic-lights-ws-server/:/traffic-lights-ws-server
+    command: sh -c "bun install && bun run start"
+    ports:
+      - "8001:8001"
+    networks:
+      zephyr-net:
+        ipv4_address: 10.5.0.4
+    depends_on:
+      - redis 
+
+  traffic-lights-monitor:
+    image: oven/bun:latest
+    working_dir: /traffic-lights-monitor
+    volumes:
+      - ./traffic-lights-monitor/:/traffic-lights-monitor
+    command: sh -c "bun install && bun run build && bun run start"
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://zephyr-dev:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8001
+    networks:
+      zephyr-net:
+        ipv4_address: 10.5.0.5
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      zephyr-net:
+        ipv4_address: 10.5.0.3
+
+volumes:
+  redis-data:
+
+networks:
+  zephyr-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/24
